@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  backend:
+    build: ./server
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGODB_CONNECTION=mongodb://mongo:27017/test
+      - JWT_SECRET=mysecret123
+    depends_on:
+      - mongo
+
+  frontend:
+    build: ./client
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_BACKEND_URL=http://localhost:5000/
+    depends_on:
+      - backend
+
+  mongo:
+    image: mongo
+    ports:
+      - "27017:27017"
