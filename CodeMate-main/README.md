@@ -172,14 +172,3 @@ CodeMate/
 
 Tushar Vohra
 
----
-
-## ⭐ Contribution
-
-Feel free to fork, improve, and contribute!
-
----
-
-## 📜 License
-
-This project is for educational and learning purposes.
