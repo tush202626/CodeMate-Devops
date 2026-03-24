@@ -1,4 +1,5 @@
 require('dotenv').config();
+
 const { SocketEvent, USER_CONNECTION_STATUS } = require('./types');
 const http = require("http");
 const cors = require("cors");
@@ -12,18 +13,14 @@ const executeCodeRoutes = require("./routes/execute-routes");
 const mongoose = require('mongoose');
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 app.use(express.json());
-
-/* ✅ FIX: CORS OPEN FOR ALL (IMPORTANT) */
 app.use(cors());
-
 app.use(express.static(path.join(__dirname, "../public")));
 
 const server = http.createServer(app);
 
-/* ✅ FIX: socket.io CORS OPEN */
 const io = new Server(server, {
     cors: {
         origin: "*",
@@ -33,8 +30,7 @@ const io = new Server(server, {
 
 let userSocketMap = [];
 
-// ---------------- SOCKET LOGIC ----------------
-
+// SOCKET LOGIC (same as yours)
 function getUsersInRoom(roomId) {
     return userSocketMap.filter((user) => user.roomId === roomId);
 }
@@ -48,7 +44,6 @@ function getUserBySocketId(socketId) {
 }
 
 io.on("connection", (socket) => {
-
     socket.on(SocketEvent.JOIN_REQUEST, ({ roomId, username }) => {
         const exists = getUsersInRoom(roomId).find(u => u.username === username);
         if (exists) {
@@ -75,28 +70,26 @@ io.on("connection", (socket) => {
     });
 });
 
-// ---------------- ROUTES ----------------
-
+// ROUTES
 app.use("/api/code", executeCodeRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/room", roomRoutes);
 
-// ---------------- ERROR HANDLER ----------------
-
+// ERROR HANDLER
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).json({ message: 'Something went wrong!' });
 });
 
-// ---------------- DB + SERVER ----------------
-
-mongoose.connect(process.env.MONGODB_CONNECTION)
+// ✅ FIXED HERE
+mongoose.connect(process.env.MONGO_URI)
     .then(() => {
         server.listen(PORT, () => {
             console.log(`✅ Server running on http://localhost:${PORT}`);
         });
+        console.log("✅ Database connected");
     })
     .catch((err) => {
-        console.log("DB Error:", err);
+        console.log("❌ DB Error:", err);
     });
