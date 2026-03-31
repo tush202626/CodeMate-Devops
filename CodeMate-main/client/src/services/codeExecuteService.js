@@ -18,7 +18,9 @@ class CodeExecuteService
         catch(err)
         {
             console.log(err);
+            return { error: "Network error", success: false };
         }
+        if (!response) return { error: "Server unreachable", success: false };
 
         // will get result array of objects containing [{ id, name }]
         return (await response.json());
@@ -47,7 +49,9 @@ class CodeExecuteService
         catch(err)
         {
             console.log(err);
+            return { error: "Network error", success: false };
         }
+        if (!response) return { error: "Server unreachable", success: false };
 
         return (await response.json());
     }

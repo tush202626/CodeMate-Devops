@@ -1,6 +1,6 @@
 class AuthService {
     // ✅ FIX: directly set backend URL
-    url = "http://localhost:5000/";
+    url = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000/";
 
     async loginUser(email, password) {
         let response;

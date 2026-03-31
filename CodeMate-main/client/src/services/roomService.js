@@ -24,7 +24,9 @@ class RoomService
         catch(err)
         {
             console.log(err);
+            return { success: false, message: "Network error" };
         }
+        if(!response) return { success: false, message: "Server unreachable" };
 
         if(response.status == 404)
             return { success: false, message: "User not found" };
@@ -53,7 +55,9 @@ class RoomService
         catch(err)
         {
             console.log(err);
+            return { success: false, message: "Network error" };
         }
+        if(!response) return { success: false, message: "Server unreachable" };
 
         const data = await response.json();
         
@@ -87,7 +91,9 @@ class RoomService
         catch(err)
         {
             console.log(err);
+            return { success: false, message: "Network error" };
         }
+        if(!response) return { success: false, message: "Server unreachable" };
 
         if(response.status == 404)
             return { success: false, message: "User does not exist" }   
@@ -122,7 +128,9 @@ class RoomService
         catch(err)
         {
             console.log(err);
+            return { success: false, message: "Network error" };
         }
+        if(!response) return { success: false, message: "Server unreachable" };
 
         const data = await response.json();
 
@@ -158,7 +166,9 @@ class RoomService
         catch(err)
         {
             console.log(err);
+            return { success: false, message: "Network error" };
         }
+        if(!response) return { success: false, message: "Server unreachable" };
         
         if(response.status == 404)
             return { success: false, message: 'User / Room not found' };
@@ -193,7 +203,9 @@ class RoomService
         catch(err)
         {
             console.log(err);
+            return { success: false, message: "Network error" };
         }
+        if(!response) return { success: false, message: "Server unreachable" };
 
         const data = await response.json();
 
@@ -225,7 +237,9 @@ class RoomService
         catch(err)
         {
             console.log(err);
+            return { success: false, message: "Network error" };
         }
+        if(!response) return { success: false, message: "Server unreachable" };
 
         const data = await response.json();
         
@@ -257,7 +271,9 @@ class RoomService
         catch(err)
         {
             console.log(err);
+            return { success: false, message: "Network error" };
         }
+        if(!response) return { success: false, message: "Server unreachable" };
 
         const data = await response.json();
         

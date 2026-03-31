@@ -20,7 +20,7 @@ function Editor() {
     const { socket } = useSocket();
     const [timeoutId, setTimeoutId] = useState(null);
 
-    const filteredUsers = useMemo(() => users.filter((u) => u.username !== currentUser.username), [users, currentUser]);
+    const filteredUsers = useMemo(() => users.filter((u) => u.username !== currentUser?.username), [users, currentUser]);
 
     const languageExtensions = {
         js: javascript(),

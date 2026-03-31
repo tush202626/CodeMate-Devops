@@ -26,6 +26,11 @@ class UserService
         catch(err)
         {
             console.log(err);
+            return { success: false, message: "Network error fetching user data" };
+        }
+
+        if (!response) {
+            return { success: false, message: "Server unreachable" };
         }
 
         const data = await response.json();
@@ -56,6 +61,11 @@ class UserService
         catch(err)
         {
             console.log(err);
+            return { success: false, message: "Network error fetching user data" };
+        }
+
+        if (!response) {
+            return { success: false, message: "Server unreachable" };
         }
 
         const data = await response.json();

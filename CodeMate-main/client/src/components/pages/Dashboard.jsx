@@ -82,7 +82,7 @@ const Dashboard = () => {
         if (status === USER_STATUS.ATTEMPTING_JOIN) return;
 
         const data = {
-          username: currentUser.username,
+          username: currentUser?.username,
           roomId: response.room._id,
         };
 
@@ -113,7 +113,7 @@ const Dashboard = () => {
       if(roomData.success)
       {
         const data = {
-          username: currentUser.username,
+          username: currentUser?.username,
           roomId: joinRoomId,
         };
         setJoinRoomId(joinRoomId);
@@ -145,7 +145,7 @@ const Dashboard = () => {
     if(roomData.success)
     {
       const data = {
-        username: currentUser.username,
+        username: currentUser?.username,
         roomId: roomId,
       };
       setJoinRoomId(roomId);

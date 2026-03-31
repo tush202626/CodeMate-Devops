@@ -142,7 +142,7 @@ function EditorPage() {
                 }
                 else
                 {
-                    if(currentUser.username != data.user.username)
+                    if(currentUser?.username != data.user?.username)
                     {
                         toast.error("Room owner is not in room");
                         setStatus(USER_STATUS.DISCONNECTED);
