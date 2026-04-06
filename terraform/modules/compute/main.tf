@@ -1,0 +1,174 @@
+data "aws_ami" "ubuntu" {
+  most_recent = true
+  owners      = ["099720109477"]
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+}
+
+resource "aws_instance" "bastion" {
+  ami           = data.aws_ami.ubuntu.id
+  instance_type = var.instance_type
+  subnet_id     = var.public_subnet_ids[0]
+  vpc_security_group_ids = [var.bastion_sg_id]
+  key_name      = var.key_name
+
+  tags = {
+    Name = "CodeMate-Bastion-Host"
+  }
+}
+
+resource "aws_instance" "backend" {
+  ami           = data.aws_ami.ubuntu.id
+  instance_type = var.instance_type
+  subnet_id     = var.app_subnet_ids[1]
+  vpc_security_group_ids = [var.app_sg_id]
+  key_name      = var.key_name
+
+  root_block_device {
+    volume_size = 14
+  }
+
+  tags = {
+    Name = "CodeMate-Backend-Tier"
+  }
+
+  user_data_replace_on_change = true
+
+  user_data = <<-EOF
+    #!/bin/bash
+    set -e
+    # FORCE REBUILD 4
+    exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
+
+    apt-get update
+    apt-get install -y docker.io git curl
+
+    fallocate -l 1G /swapfile
+    chmod 600 /swapfile
+    mkswap /swapfile
+    swapon /swapfile
+    echo '/swapfile none swap sw 0 0' >> /etc/fstab
+    
+    mkdir -p /usr/local/lib/docker/cli-plugins
+    curl -SL "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64" -o /usr/local/lib/docker/cli-plugins/docker-compose
+    chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+    
+    systemctl enable docker
+    systemctl start docker
+
+    cd /home/ubuntu
+    git clone https://github.com/tushar26vohra/codemate-devops.git app
+    cd app/CodeMate-main
+
+    echo "MONGO_URI=mongodb://${var.mongodb_private_ip}:27017/codemate" > .env
+    echo "JWT_SECRET=${var.jwt_secret}" >> .env
+    echo "API_KEY=${var.api_key}" >> .env
+    
+    cp .env server/.env
+
+    cat <<'EXEC_FIX' > server/src/execute.js
+const baseUrl = 'https://ce.judge0.com';
+async function execute(code, language_id, stdin) {
+  const url = baseUrl + "/submissions?base64_encoded=true&wait=true";
+  let encoded_code = btoa(code); let encoded_input = btoa(stdin);
+  const options = {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ language_id: language_id, source_code: encoded_code, stdin: encoded_input })
+  };
+  try { return await (await fetch(url, options)).json(); } catch (e) { throw new Error('Failed to submit code.'); }
+}
+async function main(code, language_id, stdin) {
+  const res = await execute(code, language_id, stdin);
+  if (res && res.token) {
+    if (res.status.id === 3) return { type: 'stdout', output: atob(res.stdout || "") };
+    return { type: 'stderr', output: atob(res.compile_output || res.stderr || "") || "Unknown Error" };
+  } else throw new Error('Submission token not found!');
+}
+module.exports = { main };
+EXEC_FIX
+
+    apt-get install -y netcat-openbsd
+    echo "Waiting for MongoDB on ${var.mongodb_private_ip}:27017..."
+    while ! nc -z ${var.mongodb_private_ip} 27017; do
+      sleep 5
+    done
+    echo "MongoDB is up! Starting backend."
+
+    docker compose up -d --build backend
+  EOF
+}
+
+resource "aws_lb_target_group_attachment" "backend_attach" {
+  target_group_arn = var.backend_tg_arn
+  target_id        = aws_instance.backend.id
+  port             = 5000
+}
+
+
+resource "aws_instance" "frontend" {
+  ami           = data.aws_ami.ubuntu.id
+  instance_type = var.instance_type
+  subnet_id     = var.app_subnet_ids[0]
+  vpc_security_group_ids = [var.app_sg_id]
+  key_name      = var.key_name
+
+  root_block_device {
+    volume_size = 14
+  }
+
+  tags = {
+    Name = "CodeMate-Frontend-Tier"
+  }
+  
+  user_data_replace_on_change = true
+
+  user_data = <<-EOF
+    #!/bin/bash
+    set -e
+    exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
+
+    apt-get update
+    apt-get install -y docker.io git curl
+
+    fallocate -l 2G /swapfile
+    chmod 600 /swapfile
+    mkswap /swapfile
+    swapon /swapfile
+    echo '/swapfile none swap sw 0 0' >> /etc/fstab
+    
+    mkdir -p /usr/local/lib/docker/cli-plugins
+    curl -SL "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64" -o /usr/local/lib/docker/cli-plugins/docker-compose
+    chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+    
+    systemctl enable docker
+    systemctl start docker
+
+    cd /home/ubuntu
+    git clone https://github.com/tushar26vohra/codemate-devops.git app
+    cd app/CodeMate-main
+
+    sed -i 's/Date.now.toString()/Date.now().toString()/g' client/src/context/FileContext.jsx
+    sed -i '/WORKDIR \/app/a ENV NODE_OPTIONS="--max_old_space_size=2048"' client/Dockerfile
+    sed -i "s|ENV VITE_BACKEND_URL=.*|ENV VITE_BACKEND_URL=http://${var.alb_dns_name}/|g" client/Dockerfile
+
+    echo "VITE_BACKEND_URL=http://${var.alb_dns_name}/" > .env
+    echo "VITE_BACKEND_URL=http://${var.alb_dns_name}/" > client/.env
+
+    docker compose up -d --build --no-deps frontend
+  EOF
+}
+
+resource "aws_lb_target_group_attachment" "frontend_attach" {
+  target_group_arn = var.frontend_tg_arn
+  target_id        = aws_instance.frontend.id
+  port             = 5173
+}

@@ -33,8 +33,8 @@ function ListChats() {
 
   return (
     <div className="flex flex-col gap-3 overflow-y-auto p-4 h-full w-full" ref={msgsBoxRef} onScroll={handleScroll}>
-      {msgs.map((msg, idx) => {
-        const isCurrentUser = msg.username === currentUser.username
+      {msgs?.map((msg, idx) => {
+        const isCurrentUser = msg?.username === currentUser?.username
         return (
           <div key={idx} className={`flex ${isCurrentUser ? "justify-end" : "justify-start"} animate-fade-in`}>
             <div

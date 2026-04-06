@@ -67,6 +67,9 @@ exports.addFileToRoom = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(roomId)) {
       return res.status(400).json({ message: "Invalid Room ID" });
     }
+    if (!file || !file.name) {
+      return res.status(400).json({ message: "Valid file object with name is required" });
+    }
 
     const room = await Room.findById(roomId);
     if (!room) return res.status(404).json({ message: 'Room not found' });

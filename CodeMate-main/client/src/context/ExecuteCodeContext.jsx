@@ -34,23 +34,27 @@ const ExecuteCodeContextProvider = ({children}) => {
     const codeExecuteService = new CodeExecuteService();
 
     useEffect(() => {
-        const fetchLanguages = async () => {
+        const fetchLanguagesAsync = async () => {
             try{
-                const fetchLanguages = await codeExecuteService.getSupportedLanguages();
-                setSupportedLanguages(fetchLanguages.result);
-                // selectedLanguage = activeFile;
+                const responseData = await codeExecuteService.getSupportedLanguages();
+                if (responseData.error || !responseData.result) {
+                    setSupportedLanguages([]);
+                    console.error("Fetch languages error:", responseData.error);
+                } else {
+                    setSupportedLanguages(responseData.result || []);
+                }
             }
             catch(err){
                 console.log(err);
-                toast.error("Failed to fetch languages");
+                setSupportedLanguages([]);
             }
         }
         
-        fetchLanguages();
+        fetchLanguagesAsync();
     }, []);
 
     useEffect(() => {
-        if (supportedLanguages.length === 0 || !activeFile?.name) return;
+        if (!supportedLanguages || supportedLanguages.length === 0 || !activeFile?.name) return;
     
         const ext = activeFile.name.split(".").pop();
         if (ext) {

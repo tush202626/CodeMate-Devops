@@ -3,7 +3,7 @@ import AuthService from "./authService";
 class RoomService
 {
     authService = new AuthService();
-    url = `${import.meta.env.VITE_BACKEND_URL}api/room`;
+    url = `${import.meta.env.VITE_BACKEND_URL || "http://localhost:5000/"}api/room`;
 
     async getRoomsByUsername(username)
     {

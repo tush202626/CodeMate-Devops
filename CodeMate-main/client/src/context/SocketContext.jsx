@@ -25,7 +25,7 @@ export const useSocket = () => {
         return context;
 }
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000/";
 
 const SocketProvider = ({children}) =>{
     const {
@@ -43,7 +43,7 @@ const SocketProvider = ({children}) =>{
         () => 
             io(BACKEND_URL ,{
                 autoConnect: false,
-                reconnectionAttempts : 1,
+                reconnectionAttempts : 5,
             }),
             []  
     )
@@ -116,12 +116,11 @@ const SocketProvider = ({children}) =>{
         // socket.on(SocketEvent.SYNC_DRAWING, handleDrawingSync)
 
         return () => {
-            socket.off(SocketEvent.CONNECTTION_ERROR)
-            socket.off(SocketEvent.CONNECTTION_FAILED)
-            socket.off(SocketEvent.USERNAME_EXISTS)
-            socket.off(SocketEvent.JOIN_ACCEPTED)
-            // socket.off(SocketEvent.USER_JOINED)
-            socket.off(SocketEvent.USER_DISCONNECTED)
+            socket.off(SocketEvent.CONNECTTION_ERROR, handleError)
+            socket.off(SocketEvent.CONNECTTION_FAILED, handleError)
+            socket.off(SocketEvent.USERNAME_EXISTS, handleUsernameExist)
+            socket.off(SocketEvent.JOIN_ACCEPTED, handleJoiningAccept)
+            socket.off(SocketEvent.USER_DISCONNECTED, handleUserLeft)
             // socket.off(SocketEvent.REQUEST_DRAWING)
             // socket.off(SocketEvent.SYNC_DRAWING)
         }

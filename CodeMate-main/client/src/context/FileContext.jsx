@@ -12,21 +12,26 @@ import RoomService from "../services/roomService";
 const FileSystemContext = createContext();
 
 export const FileSystemProvider = ({ children }) => {
-  const [files, setFiles] = useState([{
-    _id: Date.now.toString(),
-    name: "index.cpp",
-    content: "#include <iostream>\nint main() { std::cout << \"Hello, World!\"; return 0; }"
-  }]);
-  const [openFiles, setOpenFiles] = useState([{
-    _id: Date.now.toString(),
-    name: "index.cpp",
-    content: "#include <iostream>\nint main() { std::cout << \"Hello, World!\"; return 0; }"
-  }]);
+  const [files, setFiles] = useState([
+    {
+      _id: Date.now().toString(),
+      name: "index.cpp",
+      content: "#include <iostream>\nint main() { std::cout << \"Hello, World!\"; return 0; }",
+    }
+  ]);
+  const [openFiles, setOpenFiles] = useState([
+    {
+      _id: Date.now().toString(),
+      name: "index.cpp",
+      content: "#include <iostream>\nint main() { std::cout << \"Hello, World!\"; return 0; }",
+    }
+  ]);
   const [activeFile, setActiveFile] = useState({
-    _id: Date.now.toString(),
+    _id: Date.now().toString(),
     name: "index.cpp",
-    content: "#include <iostream>\nint main() { std::cout << \"Hello, World!\"; return 0; }"
+    content: "#include <iostream>\nint main() { std::cout << \"Hello, World!\"; return 0; }",
   });
+
   const { socket } = useSocket();
 
   const { setUsers, room } = useAppContext();
@@ -334,8 +339,8 @@ export const FileSystemProvider = ({ children }) => {
       socket.off(SocketEvent.FILE_UPDATED, handleFileUpdate);
       socket.off(SocketEvent.FILE_RENAMED, handleFileRenamed);
       socket.off(SocketEvent.FILE_DELETED, handleFileDeleted);
-      socket.off(SocketEvent.USER_JOINED);
-      socket.off(SocketEvent.SYNC_FILE_STRUCTURE);
+      socket.off(SocketEvent.USER_JOINED, handleUserJoined);
+      socket.off(SocketEvent.SYNC_FILE_STRUCTURE, handleSyncFileStructure);
     };
   }, [socket, handleFileUpdate, handleFileCreated, handleFileDeleted, handleFileRenamed, handleSyncFileStructure, handleUserJoined]);
 

@@ -2,7 +2,7 @@ import AuthService from "./authService";
 
 class UserService
 {
-    url = import.meta.env.VITE_BACKEND_URL + "api/users";
+    url = (import.meta.env.VITE_BACKEND_URL || "http://localhost:5000/") + "api/users";
     
     authService = new AuthService();
 

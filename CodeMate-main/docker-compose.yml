@@ -6,17 +6,21 @@ services:
     ports:
       - "5000:5000"
     environment:
-      - MONGODB_CONNECTION=mongodb://mongo:27017/test
-      - JWT_SECRET=mysecret123
+      - MONGO_URI=${MONGO_URI:-mongodb://mongo:27017/test}
+      - JWT_SECRET=${JWT_SECRET:-mysecret123}
+      - API_KEY=${API_KEY:-} # Pull from host environment if available
     depends_on:
       - mongo
 
   frontend:
-    build: ./client
+    build:
+      context: ./client
+      args:
+        - VITE_BACKEND_URL=${VITE_BACKEND_URL:-http://localhost:5000/}
     ports:
       - "5173:5173"
     environment:
-      - VITE_BACKEND_URL=http://localhost:5000/
+      - VITE_BACKEND_URL=${VITE_BACKEND_URL:-http://localhost:5000/}
     depends_on:
       - backend
 
@@ -24,3 +28,8 @@ services:
     image: mongo
     ports:
       - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  mongo_data:

@@ -14,7 +14,7 @@ const User = ({ user, avatarUrl }) => {
 
     return (
         <div
-            className="flex items-center gap-4 p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow"
+            className="flex items-center gap-4 p-4 bg-gray-800 text-gray-200 rounded-lg shadow-md hover:shadow-lg transition-shadow glass"
             title={title}
         >
             <div className="relative">
@@ -30,7 +30,7 @@ const User = ({ user, avatarUrl }) => {
                 ></div>
             </div>
             <p className="text-gray-800 font-medium">
-                {currentUser.username === username ? `${username} (You)` : username}
+                {currentUser?.username === username ? `${username} (You)` : username}
             </p>
         </div>
     );
@@ -42,7 +42,7 @@ const Users = () => {
 
     useEffect(() => {
         const avatarMap = {};
-        users.forEach((user) => {
+        users?.forEach((user) => {
             avatarMap[user.socketId] = getAvatarUrl(user.username);
         });
         setUserAvatars(avatarMap);
@@ -50,7 +50,7 @@ const Users = () => {
 
     return (
         <div className="flex flex-col gap-4">
-            {users.map((user) => (
+            {users?.map((user) => (
                 <User key={user.socketId} user={user} avatarUrl={userAvatars[user.socketId]} />
             ))}
         </div>

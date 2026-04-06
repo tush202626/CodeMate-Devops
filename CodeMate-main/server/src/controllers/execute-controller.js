@@ -9,6 +9,9 @@ const executeCode = async (req, res) => {
     if (!code) {
         return res.status(400).json({ error: "Code is required" });
     }
+    if (!language_id) {
+        return res.status(400).json({ error: "Language ID is required" });
+    }
 
     try {
         const { type, output } = await main(code, language_id, stdin);

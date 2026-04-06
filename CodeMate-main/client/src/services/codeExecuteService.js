@@ -1,6 +1,6 @@
 class CodeExecuteService
 {
-    url = import.meta.env.VITE_BACKEND_URL;
+    url = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000/";
 
     async getSupportedLanguages()
     {

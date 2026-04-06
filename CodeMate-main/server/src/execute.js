@@ -1,6 +1,4 @@
-const baseUrl = 'https://judge0-ce.p.rapidapi.com';
-const apiKey = process.env.API_KEY;
-// const apiKey = '9ca6e813f8msh2369d4f279cd875p1086f7jsn9e6b171bc3f8';
+const baseUrl = 'https://ce.judge0.com';
 
 async function execute(code, language_id, stdin) {
   const url = `${baseUrl}/submissions?base64_encoded=true&wait=true`;
@@ -10,8 +8,6 @@ async function execute(code, language_id, stdin) {
   const options = {
     method: 'POST',
     headers: {
-      'x-rapidapi-key': apiKey,
-      'x-rapidapi-host': 'judge0-ce.p.rapidapi.com',
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({

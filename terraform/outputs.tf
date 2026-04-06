@@ -1,14 +1,24 @@
-output "frontend_public_ip" {
-  description = "Public IP address of the React Frontend Server"
-  value       = aws_instance.frontend.public_ip
+output "codemate_alb_url" {
+  description = "The public URL to access the CodeMate Application"
+  value       = "http://${module.load_balancer.alb_dns_name}"
 }
 
-output "backend_public_ip" {
-  description = "Public IP address of the Node.js Backend Server (for direct connections)"
-  value       = aws_instance.backend.public_ip
+output "bastion_public_ip" {
+  description = "Public IP of the Bastion host (for SSH access to private instances)"
+  value       = module.compute.bastion_public_ip
 }
 
-output "frontend_url" {
-  description = "Access the dashboard directly via HTTP"
-  value       = "http://${aws_instance.frontend.public_ip}"
+output "frontend_private_ip" {
+  description = "Private IP of the React Frontend Server"
+  value       = module.compute.frontend_private_ip
+}
+
+output "backend_private_ip" {
+  description = "Private IP of the Node.js Backend Server"
+  value       = module.compute.backend_private_ip
+}
+
+output "mongodb_private_ip" {
+  description = "Private IP of the MongoDB Server"
+  value       = module.database.mongodb_private_ip
 }

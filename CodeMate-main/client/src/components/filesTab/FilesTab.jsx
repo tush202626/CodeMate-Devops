@@ -119,7 +119,7 @@ export default function FilesTab() {
         >
           <div className="flex space-x-1 p-2 min-w-max">
             <AnimatePresence initial={false}>
-              {openFiles.map((file) => (
+              {openFiles?.map((file) => (
                 <motion.div
                   key={file._id}
                   layout

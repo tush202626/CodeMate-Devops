@@ -62,7 +62,8 @@ io.on("connection", (socket) => {
         socket.join(roomId);
 
         socket.broadcast.to(roomId).emit(SocketEvent.USER_JOINED, { user });
-        io.to(socket.id).emit(SocketEvent.JOIN_ACCEPTED, { user });
+        const users = getUsersInRoom(roomId);
+        io.to(socket.id).emit(SocketEvent.JOIN_ACCEPTED, { user, users });
     });
 
     socket.on("disconnect", () => {
@@ -71,6 +72,7 @@ io.on("connection", (socket) => {
 });
 
 // ROUTES
+app.get("/", (req, res) => res.status(200).send("OK"));
 app.use("/api/code", executeCodeRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);

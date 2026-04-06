@@ -4,21 +4,21 @@ const mongoose = require('mongoose');
 console.log('🔍 MongoDB Connection Diagnostic Tool');
 console.log('=====================================\n');
 
-// Check if MONGODB_CONNECTION is defined
+// Check if MONGO_URI is defined
 console.log('1. Checking environment variables...');
-if (!process.env.MONGODB_CONNECTION) {
-    console.error('❌ MONGODB_CONNECTION is not defined in .env file');
-    console.log('   Please add: MONGODB_CONNECTION=mongodb://localhost:27017/your-database-name');
+if (!process.env.MONGO_URI) {
+    console.error('❌ MONGO_URI is not defined in .env file');
+    console.log('   Please add: MONGO_URI=mongodb://localhost:27017/your-database-name');
     process.exit(1);
 } else {
-    console.log('✅ MONGODB_CONNECTION found:', process.env.MONGODB_CONNECTION.replace(/\/\/([^:]+):([^@]+)@/, '//***:***@'));
+    console.log('✅ MONGO_URI found:', process.env.MONGO_URI.replace(/\/\/([^:]+):([^@]+)@/, '//***:***@'));
 }
 
 // Test MongoDB connection
 console.log('\n2. Testing MongoDB connection...');
 console.log('   Connecting...');
 
-mongoose.connect(process.env.MONGODB_CONNECTION, {
+mongoose.connect(process.env.MONGO_URI, {
     serverSelectionTimeoutMS: 5000, // 5 second timeout
     socketTimeoutMS: 45000,
 })
