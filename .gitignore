@@ -1,0 +1,20 @@
+# Node and Environment Secrets
+node_modules/
+.env
+.env.*
+*.env
+
+# Terraform Secrets and State
+*.tfvars
+*.tfstate
+*.tfstate.backup
+*.pem
+.terraform/
+.terraform.lock.hcl
+
+# IDEs
+.vscode/
+
+# Build artifacts
+dist/
+build/
