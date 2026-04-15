@@ -64,13 +64,35 @@ function Editor() {
         [activeFile, socket, timeoutId, setActiveFile, setFiles, setOpenFiles, files, openFiles]
     );
 
+    const downloadCurrentFile = () => {
+        if (!activeFile) return;
+        const blob = new Blob([activeFile.content], { type: "text/plain;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = activeFile.name || "code.txt";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    };
+
     const extensions = useMemo(() => [scrollPastEnd(), autocompletion(), getFileExtension(), tooltipField(filteredUsers), cursorTooltipBaseTheme], [activeFile, filteredUsers]);
 
     return (
-        <div className="flex w-full flex-col overflow-x-auto md:h-screen">
+        <div className="flex w-full flex-col overflow-x-auto md:h-screen relative">
             {activeFile ? (
-                <CodeMirror
-                    onChange={onCodeChange}
+                <>
+                    <button
+                        onClick={downloadCurrentFile}
+                        className="absolute z-10 flex items-center gap-2 px-3 py-2 text-sm font-medium text-white transition-colors bg-blue-600 rounded-md shadow-md top-4 right-8 hover:bg-blue-700 border border-blue-500"
+                        title="Download this file to your computer"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        Download Code
+                    </button>
+                    <CodeMirror
+                        onChange={onCodeChange}
                     value={activeFile.content}
                     extensions={extensions}
                     minHeight="100%"
@@ -84,6 +106,7 @@ function Editor() {
                     }}
                     theme={oneDark}
                 />
+                </>
             ) : (
                 <div className="flex flex-col items-center justify-center h-full bg-zinc-800 text-slate-200">
                     <div className="text-2xl font-semibold mb-2">No file is open</div>
