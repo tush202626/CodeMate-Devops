@@ -9,8 +9,6 @@ services:
       - MONGO_URI=${MONGO_URI:-mongodb://mongo:27017/test}
       - JWT_SECRET=${JWT_SECRET:-mysecret123}
       - API_KEY=${API_KEY:-} # Pull from host environment if available
-    depends_on:
-      - mongo
 
   frontend:
     build:
@@ -21,8 +19,6 @@ services:
       - "5173:5173"
     environment:
       - VITE_BACKEND_URL=${VITE_BACKEND_URL:-http://localhost:5000/}
-    depends_on:
-      - backend
 
   mongo:
     image: mongo

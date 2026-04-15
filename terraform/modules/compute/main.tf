@@ -54,17 +54,13 @@ resource "aws_instance" "backend" {
     done
 
     apt-get update
-    apt-get install -y docker.io git curl
+    DEBIAN_FRONTEND=noninteractive apt-get install -y docker.io docker-compose-v2 git curl netcat-openbsd
 
     fallocate -l 1G /swapfile
     chmod 600 /swapfile
     mkswap /swapfile
     swapon /swapfile
     echo '/swapfile none swap sw 0 0' >> /etc/fstab
-    
-    mkdir -p /usr/local/lib/docker/cli-plugins
-    curl -SL "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64" -o /usr/local/lib/docker/cli-plugins/docker-compose
-    chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
     
     systemctl enable docker
     systemctl start docker
@@ -125,17 +121,13 @@ resource "aws_instance" "frontend" {
     done
     
     apt-get update
-    apt-get install -y docker.io git curl
+    DEBIAN_FRONTEND=noninteractive apt-get install -y docker.io docker-compose-v2 git curl
 
     fallocate -l 2G /swapfile
     chmod 600 /swapfile
     mkswap /swapfile
     swapon /swapfile
     echo '/swapfile none swap sw 0 0' >> /etc/fstab
-    
-    mkdir -p /usr/local/lib/docker/cli-plugins
-    curl -SL "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64" -o /usr/local/lib/docker/cli-plugins/docker-compose
-    chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
     
     systemctl enable docker
     systemctl start docker

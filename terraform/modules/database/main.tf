@@ -39,20 +39,16 @@ resource "aws_instance" "mongodb" {
     done
     
     apt-get update
-    apt-get install -y gnupg curl
+    DEBIAN_FRONTEND=noninteractive apt-get install -y docker.io
 
-    curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | \
-       gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg \
-       --dearmor
+    systemctl start docker
+    systemctl enable docker
 
-    echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-7.0.list
-
-    apt-get update
-    apt-get install -y mongodb-org
-
-    sed -i 's/bindIp: 127.0.0.1/bindIp: 0.0.0.0/' /etc/mongod.conf
-
-    systemctl start mongod
-    systemctl enable mongod
+    docker run -d \
+      --name mongo \
+      --restart always \
+      -p 0.0.0.0:27017:27017 \
+      -v /mongo_data:/data/db \
+      mongo:7
   EOF
 }
