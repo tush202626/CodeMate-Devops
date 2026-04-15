@@ -65,7 +65,7 @@ resource "aws_instance" "backend" {
     systemctl start docker
 
     cd /home/ubuntu
-    git clone https://github.com/tushar26vohra/codemate-devops.git app
+    git clone https://github.com/tush202626/CodeMate-Devops.git app
     cd app/CodeMate-main
 
     echo "MONGO_URI=mongodb://${var.mongodb_private_ip}:27017/codemate" > .env
@@ -73,28 +73,6 @@ resource "aws_instance" "backend" {
     echo "API_KEY=${var.api_key}" >> .env
     
     cp .env server/.env
-
-    cat <<'EXEC_FIX' > server/src/execute.js
-const baseUrl = 'https://ce.judge0.com';
-async function execute(code, language_id, stdin) {
-  const url = baseUrl + "/submissions?base64_encoded=true&wait=true";
-  let encoded_code = btoa(code); let encoded_input = btoa(stdin);
-  const options = {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ language_id: language_id, source_code: encoded_code, stdin: encoded_input })
-  };
-  try { return await (await fetch(url, options)).json(); } catch (e) { throw new Error('Failed to submit code.'); }
-}
-async function main(code, language_id, stdin) {
-  const res = await execute(code, language_id, stdin);
-  if (res && res.token) {
-    if (res.status.id === 3) return { type: 'stdout', output: atob(res.stdout || "") };
-    return { type: 'stderr', output: atob(res.compile_output || res.stderr || "") || "Unknown Error" };
-  } else throw new Error('Submission token not found!');
-}
-module.exports = { main };
-EXEC_FIX
 
     apt-get install -y netcat-openbsd
     echo "Waiting for MongoDB on ${var.mongodb_private_ip}:27017..."
@@ -153,12 +131,8 @@ resource "aws_instance" "frontend" {
     systemctl start docker
 
     cd /home/ubuntu
-    git clone https://github.com/tushar26vohra/codemate-devops.git app
+    git clone https://github.com/tush202626/CodeMate-Devops.git app
     cd app/CodeMate-main
-
-    sed -i 's/Date.now.toString()/Date.now().toString()/g' client/src/context/FileContext.jsx
-    sed -i '/WORKDIR \/app/a ENV NODE_OPTIONS="--max_old_space_size=2048"' client/Dockerfile
-    sed -i "s|ENV VITE_BACKEND_URL=.*|ENV VITE_BACKEND_URL=http://${var.alb_dns_name}/|g" client/Dockerfile
 
     echo "VITE_BACKEND_URL=http://${var.alb_dns_name}/" > .env
     echo "VITE_BACKEND_URL=http://${var.alb_dns_name}/" > client/.env

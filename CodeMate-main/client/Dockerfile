@@ -1,6 +1,7 @@
 FROM node:18
 
 WORKDIR /app
+ENV NODE_OPTIONS="--max_old_space_size=2048"
 COPY . .
 
 RUN npm install

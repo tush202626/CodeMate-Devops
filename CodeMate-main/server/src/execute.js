@@ -1,4 +1,4 @@
-const baseUrl = 'https://ce.judge0.com';
+const baseUrl = 'https://judge0-ce.p.rapidapi.com';
 
 async function execute(code, language_id, stdin) {
   const url = `${baseUrl}/submissions?base64_encoded=true&wait=true`;
@@ -9,6 +9,8 @@ async function execute(code, language_id, stdin) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'x-rapidapi-key': process.env.API_KEY || "",
+      'x-rapidapi-host': 'judge0-ce.p.rapidapi.com'
     },
     body: JSON.stringify({
       language_id: language_id,

@@ -35,12 +35,20 @@ function cmp(a, b)
 }
 
 const getLanguages = async (req, res) => {
-  const baseUrl = "https://ce.judge0.com"; // Free Judge0
+  const baseUrl = "https://judge0-ce.p.rapidapi.com";
 
   try {
-    console.log("🔄 Fetching languages from Judge0 (no API key)...");
+    console.log("🔄 Fetching languages from Judge0 via RapidAPI...");
 
-    const response = await fetch(`${baseUrl}/languages`);
+    const options = {
+      method: 'GET',
+      headers: {
+        'x-rapidapi-key': process.env.API_KEY || "",
+        'x-rapidapi-host': 'judge0-ce.p.rapidapi.com'
+      }
+    };
+
+    const response = await fetch(`${baseUrl}/languages`, options);
 
     if (!response.ok) {
       throw new Error(`Judge0 API error: ${response.status} ${response.statusText}`);
