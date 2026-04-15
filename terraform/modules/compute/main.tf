@@ -45,8 +45,13 @@ resource "aws_instance" "backend" {
   user_data = <<-EOF
     #!/bin/bash
     set -e
-    # FORCE REBUILD 4
+    # FORCE REBUILD 5
     exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
+
+    # Wait for NAT Gateway to be fully provisioned
+    until ping -c 1 8.8.8.8 &>/dev/null; do
+      sleep 5
+    done
 
     apt-get update
     apt-get install -y docker.io git curl
@@ -114,6 +119,11 @@ resource "aws_instance" "frontend" {
     set -e
     exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
 
+    # Wait for NAT Gateway to be fully provisioned
+    until ping -c 1 8.8.8.8 &>/dev/null; do
+      sleep 5
+    done
+    
     apt-get update
     apt-get install -y docker.io git curl
 

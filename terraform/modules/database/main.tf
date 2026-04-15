@@ -33,6 +33,11 @@ resource "aws_instance" "mongodb" {
     set -e
     exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
 
+    # Wait for NAT Gateway to be fully provisioned
+    until ping -c 1 8.8.8.8 &>/dev/null; do
+      sleep 5
+    done
+    
     apt-get update
     apt-get install -y gnupg curl
 
