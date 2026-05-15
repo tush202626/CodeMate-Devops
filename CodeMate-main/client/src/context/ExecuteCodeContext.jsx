@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 import CodeExecuteService from "../services/codeExecuteService";
 import langMap from "lang-map";
 import { useFileSystem } from "./FileContext";
+import { useSocket } from "./SocketContext";
 
 const ExecuteCodeContext = createContext(null)
 
@@ -79,46 +80,51 @@ const ExecuteCodeContextProvider = ({children}) => {
     }, [activeFile, supportedLanguages]);
     
 
+    const { socket } = useSocket();
+
+    useEffect(() => {
+        if (!socket) return;
+        
+        const onOutput = (data) => {
+            setOutput(prev => prev + data);
+        };
+        const onEnd = () => {
+            setIsRunning(false);
+            toast.dismiss();
+            toast.success("Execution completed!");
+        };
+
+        socket.on('EXECUTION_OUTPUT', onOutput);
+        socket.on('EXECUTION_END', onEnd);
+
+        return () => {
+            socket.off('EXECUTION_OUTPUT', onOutput);
+            socket.off('EXECUTION_END', onEnd);
+        };
+    }, [socket]);
+
     const executeCode = async () => {
-        try
-        {
-            if(!selectedLanguage.id)
-            {
-                return toast.error("Please select a language");
-            }
-            else if(!activeFile)
-            {
-                return toast.error("Please open a file to run the code");
-            }
-            else
-            {
-                toast.loading("Running code...");
-            }
-
-            setIsRunning(true);
-
-            const res = await codeExecuteService.executeCode(activeFile.content, selectedLanguage.id, input);
-
-            if(res.success)
-            {
-                setIsError(false);
-                setOutput(res.output);
-            }
-            else
-            {
-                setIsError(true);
-                setOutput(res.error);
-            }
-            
-            setIsRunning(false);
-            toast.dismiss();
+        if(!selectedLanguage.id) {
+            return toast.error("Please select a language");
+        } else if(!activeFile) {
+            return toast.error("Please open a file to run the code");
         }
-        catch(err)
-        {
-            console.error(err);
-            setIsRunning(false);
-            toast.dismiss();
-            toast.error("Failed to run the code");
+        
+        toast.loading("Running interactively...");
+        setIsRunning(true);
+        setIsError(false);
+        setOutput(""); // Clear old output
+
+        socket.emit('START_EXECUTION', {
+            code: activeFile.content,
+            language_id: selectedLanguage.id
+        });
+    }
+
+    const sendInput = (text) => {
+        if (socket && isRunning) {
+            socket.emit('EXECUTION_INPUT', text);
+            setOutput(prev => prev + text + '\n'); // Echo input
         }
     }
 

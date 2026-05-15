@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ override: true });
 
 const { SocketEvent, USER_CONNECTION_STATUS } = require('./types');
 const http = require("http");
@@ -14,6 +14,19 @@ const mongoose = require('mongoose');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+
+const connectDB = async () => {
+    try {
+        await mongoose.connect(process.env.MONGO_URI);
+        console.log('✅ MongoDB Connected');
+    } catch (error) {
+        console.error('❌ MongoDB Connection Error:', error.message);
+        console.error('⚠️ Please ensure MongoDB is running locally on port 27017 or update MONGO_URI in .env');
+    }
+};
+
+connectDB();
 
 app.use(express.json());
 app.use(cors());
@@ -43,7 +56,10 @@ function getUserBySocketId(socketId) {
     return userSocketMap.find((user) => user.socketId === socketId);
 }
 
+const handleExecutionSockets = require('./execute-socket');
+
 io.on("connection", (socket) => {
+    handleExecutionSockets(socket);
     socket.on(SocketEvent.JOIN_REQUEST, ({ roomId, username }) => {
         const exists = getUsersInRoom(roomId).find(u => u.username === username);
         if (exists) {
@@ -84,14 +100,6 @@ app.use((err, req, res, next) => {
     res.status(500).json({ message: 'Something went wrong!' });
 });
 
-// ✅ FIXED HERE
-mongoose.connect(process.env.MONGO_URI)
-    .then(() => {
-        server.listen(PORT, () => {
-            console.log(`✅ Server running on http://localhost:${PORT}`);
-        });
-        console.log("✅ Database connected");
-    })
-    .catch((err) => {
-        console.log("❌ DB Error:", err);
-    });
+server.listen(PORT, () => {
+    console.log(`✅ Server running on http://localhost:${PORT}`);
+});

@@ -34,12 +34,17 @@ function cmp(a, b)
     return a.id < b.id ? -1 : 1;
 }
 
+const fallbackLanguages = [
+  { id: 50, name: "C (GCC Local)" },
+  { id: 54, name: "C++ (GCC Local)" },
+  { id: 63, name: "JavaScript (Node.js Local)" },
+  { id: 71, name: "Python (3.x Local)" },
+];
+
 const getLanguages = async (req, res) => {
   const baseUrl = "https://judge0-ce.p.rapidapi.com";
 
   try {
-    console.log("🔄 Fetching languages from Judge0 via RapidAPI...");
-
     const options = {
       method: 'GET',
       headers: {
@@ -51,19 +56,15 @@ const getLanguages = async (req, res) => {
     const response = await fetch(`${baseUrl}/languages`, options);
 
     if (!response.ok) {
-      throw new Error(`Judge0 API error: ${response.status} ${response.statusText}`);
+      return res.status(200).json({ result: fallbackLanguages });
     }
 
     let result = await response.json();
-
-    console.log("Languages fetched from Judge0:", result.length);
-
     result = result.filter((l) => l.id <= 80).sort((a, b) => (a.id < b.id ? -1 : 1));
 
     res.status(200).json({ result });
   } catch (error) {
-    console.error("Error while fetching supported languages (Judge0):", error);
-    res.status(500).json({ error: "An error occurred while fetching supported languages" });
+    res.status(200).json({ result: fallbackLanguages });
   }
 };
 

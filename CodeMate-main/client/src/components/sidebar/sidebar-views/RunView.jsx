@@ -57,20 +57,6 @@ const RunView = () => {
         </div>
       </div>
 
-      {/* Input Section */}
-      <div className="flex-1 flex flex-col">
-        <label className="block text-sm font-medium text-gray-600 mb-2">
-          Standard Input
-        </label>
-        <textarea
-          className="w-full flex-1 bg-gray-50 border-2 border-gray-200 rounded-xl p-4 
-                    font-mono text-sm focus:border-black focus:ring-2 focus:ring-blue-200 
-                    resize-none transition-all duration-200 placeholder:text-gray-400"
-          placeholder="Enter input here..."
-          onChange={(e) => setInput(e.target.value)}
-        />
-      </div>
-
       {/* Run Button */}
       <button
         className="w-full bg-black text-white py-3 rounded-xl font-semibold 
@@ -88,10 +74,10 @@ const RunView = () => {
         )}
       </button>
 
-      {/* Output Section */}
-      <div className="flex-1 flex flex-col">
+      {/* Interactive Terminal Section */}
+      <div className="flex-1 flex flex-col h-full">
         <div className="flex justify-between items-center mb-2">
-          <label className="text-sm font-medium text-gray-600">Output</label>
+          <label className="text-sm font-medium text-gray-600">Interactive Terminal</label>
           <button 
             onClick={copyOutput}
             className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors text-gray-600 
@@ -101,12 +87,25 @@ const RunView = () => {
             <IoCopyOutline className="w-5 h-5" />
           </button>
         </div>
-        <div className="relative flex-1 bg-gray-50 border-2 border-gray-200 rounded-xl 
-                      overflow-hidden has-[pre]:p-4">
-          <pre className={`absolute left-2 top-2 inset-0 overflow-auto font-mono text-sm 
-                        whitespace-pre-wrap ${isError ? 'text-red-600' : 'text-gray-800' }`}>
-            {output || "// Your program output will appear here..."}
-          </pre>
+        <div className="flex-1 bg-gray-900 border-2 border-gray-700 rounded-xl flex flex-col overflow-hidden">
+          <div className="flex-1 overflow-auto p-4">
+            <pre className={`font-mono text-sm whitespace-pre-wrap ${isError ? 'text-red-400' : 'text-green-400' }`}>
+              {output || "// Interactive output will appear here..."}
+            </pre>
+          </div>
+          {isRunning && (
+            <input 
+              autoFocus
+              className="w-full bg-gray-800 text-green-400 p-3 font-mono text-sm border-t border-gray-700 outline-none placeholder:text-gray-500"
+              placeholder="Type input and press Enter..."
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  sendInput(e.target.value);
+                  e.target.value = '';
+                }
+              }}
+            />
+          )}
         </div>
       </div>
     </div>
